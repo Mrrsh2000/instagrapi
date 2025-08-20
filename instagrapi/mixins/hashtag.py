@@ -293,7 +293,7 @@ class HashtagMixin:
             for node in nodes:
                 if max_amount and len(medias) >= max_amount:
                     break
-                media = extract_media_v1(node["media"])
+                media = extract_media_v1(node)
                 # check contains hashtag in caption
                 # if f"#{name}" not in media.caption_text:
                 #     continue
