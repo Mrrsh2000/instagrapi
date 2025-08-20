@@ -15,7 +15,7 @@ from instagrapi.extractors import (
     extract_media_v1,
 )
 from instagrapi.types import Hashtag, Media
-from instagrapi.utils import dumps
+from instagrapi.utils import dumps, extract_values_from_json_data
 
 
 class HashtagMixin:
@@ -288,7 +288,8 @@ class HashtagMixin:
             next_max_id = base64.b64encode(json.dumps([np, ids]).encode()).decode()
         for section in result["sections"]:
             layout_content = section.get("layout_content") or {}
-            nodes = layout_content.get("medias") or []
+            medias = extract_values_from_json_data(layout_content,"media")
+            nodes = medias or []
             for node in nodes:
                 if max_amount and len(medias) >= max_amount:
                     break

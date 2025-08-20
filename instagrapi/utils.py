@@ -142,3 +142,20 @@ def random_delay(delay_range: list):
 def vassert(pred, message):
     if not pred:
         raise ValidationError(message)
+
+def extract_values_from_json_data(json_data, target):
+    media_values = []
+
+    def extract_values(obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key == target:
+                    media_values.append(value)
+                else:
+                    extract_values(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                extract_values(item)
+
+    extract_values(json_data)
+    return media_values
