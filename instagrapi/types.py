@@ -304,8 +304,8 @@ class ClipsIgArtist(TypesBaseModel):
     full_name: str
     is_private: bool = False
     is_verified: bool = False
-    profile_pic_id: str
-    profile_pic_url: str
+    profile_pic_id: Optional[str] = None
+    profile_pic_url: Optional[str] = None
     strong_id__: str
 
 
