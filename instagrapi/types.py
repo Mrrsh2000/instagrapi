@@ -360,7 +360,7 @@ class ClipsMetadata(TypesBaseModel):
     achievements_info: ClipsAchievementsInfo
     additional_audio_info: ClipsAdditionalAudioInfo
     asset_recommendation_info: Optional[dict] = None
-    audio_ranking_info: ClipsAudioRankingInfo
+    audio_ranking_info: Optional[ClipsAudioRankingInfo] = None
     audio_type: str = "original_sounds"
     branded_content_tag_info: ClipsBrandedContentTagInfo
     breaking_content_info: Optional[dict] = None
