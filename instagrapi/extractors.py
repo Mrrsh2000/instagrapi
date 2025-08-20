@@ -49,11 +49,18 @@ def extract_media_v1(data):
         )[-1]["url"]
     if media["media_type"] == 2 and not media.get("product_type"):
         media["product_type"] = "feed"
-    if "image_versions2" in media:
-        media["thumbnail_url"] = sorted(
-            media["image_versions2"]["candidates"],
-            key=lambda o: o["height"] * o["width"],
+    candidates = media.get("image_versions2", {}).get("candidates", [])
+    if candidates:
+        media["thumbnail_url"] = max(
+            candidates,
+            key=lambda o: o["height"] * o["width"]
         )[-1]["url"]
+    else:
+        # اگر candidates نبود مثلا از first_frame استفاده کن
+        media["thumbnail_url"] = media.get("image_versions2", {}) \
+            .get("additional_candidates", {}) \
+            .get("first_frame", {}) \
+            .get("url")
     if media["media_type"] == 8:
         # remove thumbnail_url and video_url for albums
         # see resources
