@@ -54,9 +54,8 @@ def extract_media_v1(data):
         media["thumbnail_url"] = max(
             candidates,
             key=lambda o: o["height"] * o["width"]
-        )[-1]["url"]
+        )["url"]
     else:
-        # اگر candidates نبود مثلا از first_frame استفاده کن
         media["thumbnail_url"] = media.get("image_versions2", {}) \
             .get("additional_candidates", {}) \
             .get("first_frame", {}) \
