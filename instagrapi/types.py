@@ -361,7 +361,7 @@ class ClipsMetadata(TypesBaseModel):
     additional_audio_info: ClipsAdditionalAudioInfo
     asset_recommendation_info: Optional[dict] = None
     audio_ranking_info: Optional[ClipsAudioRankingInfo] = None
-    audio_type: str = "original_sounds"
+    audio_type: Optional[str] = None
     branded_content_tag_info: ClipsBrandedContentTagInfo
     breaking_content_info: Optional[dict] = None
     breaking_creator_info: Optional[dict] = None
