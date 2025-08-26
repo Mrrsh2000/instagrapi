@@ -192,22 +192,22 @@ class PublicRequestMixin:
             if "/login/" in response.url:
                 raise ClientLoginRequired(e, response=response)
             error_message_html = ""
-            if '<html>' in response.text:
+            if '<html' in response.text:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 all_text = re.sub(r'\s+', ' ', soup.get_text().strip())
                 error_keywords = ['error', 'invalid', 'login', 'required', 'access denied', 'unauthorized', 'oauth']
                 found_errors = [kw for kw in error_keywords if kw in all_text.lower()]
                 ig_indicators = ['instagram from meta', 'meta verified', 'suggested for you', 'language']
                 if any(ind in all_text.lower() for ind in ig_indicators):
-                    error_message_html = "Probably redirect To the Instagram page: token Invalid، expired، Or need to log in again Check developers.facebook.com For token."
+                    error_message_html = "Probably the Instagram page"
                 elif found_errors:
-                    error_message_html = f"Error words found: {', '.join(found_errors)} Details: {all_text[:200]}..."
+                    error_message_html = f"Error words found: {', '.join(found_errors)} Details: {all_text[:20]}..."
                 else:
-                    error_message_html = f"Unknown error in HTML: {all_text[:200]}..."
+                    error_message_html = f"Unknown error in HTML: {all_text[:20]}..."
             self.public_request_logger.error(
                 "Status %s: JSONDecodeError in public_request (url=%s) --> %s",
                 response.status_code,
-                response.url,
+                url,
                 error_message_html
             )
             raise ClientJSONDecodeError(
