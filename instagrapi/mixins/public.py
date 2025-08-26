@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import time
 
 from bs4 import BeautifulSoup
@@ -193,18 +194,16 @@ class PublicRequestMixin:
             error_message_html = ""
             if '<html>' in response.text:
                 soup = BeautifulSoup(response.text, 'html.parser')
-                title = soup.title.string.strip() if soup.title else "Title unknown"
-                error_message = ""
-                h1 = soup.find('h1')
-                if h1:
-                    error_message += h1.text.strip() + " "
-                p_tags = soup.find_all('p')
-                for p in p_tags:
-                    error_message += p.text.strip() + " "
-                if "invalid" in title.lower() or "error" in title.lower():
-                    error_message_html = f"خطای API: {title}. جزئیات: {error_message[:10]}"
+                all_text = re.sub(r'\s+', ' ', soup.get_text().strip())
+                error_keywords = ['error', 'invalid', 'login', 'required', 'access denied', 'unauthorized', 'oauth']
+                found_errors = [kw for kw in error_keywords if kw in all_text.lower()]
+                ig_indicators = ['instagram from meta', 'meta verified', 'suggested for you', 'language']
+                if any(ind in all_text.lower() for ind in ig_indicators):
+                    error_message_html = "Probably redirect To the Instagram page: token Invalid، expired، Or need to log in again Check developers.facebook.com For token."
+                elif found_errors:
+                    error_message_html = f"Error words found: {', '.join(found_errors)} Details: {all_text[:200]}..."
                 else:
-                    error_message_html = f"خطای ناشناخته در HTML: {title}. جزئیات: {error_message[:10]}"
+                    error_message_html = f"Unknown error in HTML: {all_text[:200]}..."
             self.public_request_logger.error(
                 "Status %s: JSONDecodeError in public_request (url=%s) --> %s",
                 response.status_code,
