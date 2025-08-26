@@ -2,6 +2,8 @@ import json
 import logging
 import time
 
+from bs4 import BeautifulSoup
+
 try:
     from simplejson.errors import JSONDecodeError
 except ImportError:
@@ -188,11 +190,26 @@ class PublicRequestMixin:
         except JSONDecodeError as e:
             if "/login/" in response.url:
                 raise ClientLoginRequired(e, response=response)
-
+            error_message_html = ""
+            if '<html>' in response.text:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                title = soup.title.string.strip() if soup.title else "Title unknown"
+                error_message = ""
+                h1 = soup.find('h1')
+                if h1:
+                    error_message += h1.text.strip() + " "
+                p_tags = soup.find_all('p')
+                for p in p_tags:
+                    error_message += p.text.strip() + " "
+                if "invalid" in title.lower() or "error" in title.lower():
+                    error_message_html = f"خطای API: {title}. جزئیات: {error_message[:10]}"
+                else:
+                    error_message_html = f"خطای ناشناخته در HTML: {title}. جزئیات: {error_message[:10]}"
             self.public_request_logger.error(
-                "Status %s: JSONDecodeError in public_request (url=%s)",
+                "Status %s: JSONDecodeError in public_request (url=%s) --> %s",
                 response.status_code,
                 response.url,
+                error_message_html
             )
             raise ClientJSONDecodeError(
                 "JSONDecodeError {0!s} while opening {1!s}".format(e, url),
