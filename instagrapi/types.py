@@ -477,10 +477,102 @@ class Comment(TypesBaseModel):
     like_count: Optional[int] = None
 
 
+class Dimensions(TypesBaseModel):
+    height: Optional[int] = None
+    width: Optional[int] = None
+
+
+class EdgeLikedBy(TypesBaseModel):
+    count: Optional[int] = None
+
+
+class EdgeMediaPreviewLike(TypesBaseModel):
+    count: Optional[int] = None
+
+
+class CaptionNode(TypesBaseModel):
+    text: Optional[str] = None
+
+
+class EdgeMediaToCaption(TypesBaseModel):
+    edges: Optional[List[CaptionNode]] = None
+
+
+class EdgeMediaToComment(TypesBaseModel):
+    count: Optional[int] = None
+
+
+class ThumbnailResource(TypesBaseModel):
+    config_height: Optional[int] = None
+    config_width: Optional[int] = None
+    src: Optional[HttpUrl] = None
+
+
+class Owner(TypesBaseModel):
+    id: Optional[str] = None
+
+
+class PostGraph(TypesBaseModel):
+    __typename: Optional[str] = None
+    accessibility_caption: Optional[str] = None
+    comments_disabled: Optional[bool] = None
+    dimensions: Optional[Dimensions] = None
+    display_url: Optional[HttpUrl] = None
+    edge_liked_by: Optional[EdgeLikedBy] = None
+    edge_media_preview_like: Optional[EdgeMediaPreviewLike] = None
+    edge_media_to_caption: Optional[EdgeMediaToCaption] = None
+    edge_media_to_comment: Optional[EdgeMediaToComment] = None
+    id: Optional[str] = None
+    is_video: Optional[bool] = None
+    owner: Optional[Owner] = None
+    shortcode: Optional[str] = None
+    taken_at_timestamp: Optional[int] = None  # Can be converted to datetime if needed
+    thumbnail_resources: Optional[List[ThumbnailResource]] = None
+    thumbnail_src: Optional[HttpUrl] = None
+
+
+class MediaEdge(TypesBaseModel):
+    node: Optional[PostGraph] = None
+
+
+class PageInfo(TypesBaseModel):
+    end_cursor: Optional[str] = None
+    has_next_page: Optional[bool] = None
+
+
+class EdgeHashtagToMedia(TypesBaseModel):
+    count: Optional[int] = None
+    edges: Optional[List[MediaEdge]] = None
+    page_info: Optional[PageInfo] = None
+
+
+class ContentAdvisoryEdge(TypesBaseModel):
+    pass
+
+
+class EdgeHashtagToContentAdvisory(TypesBaseModel):
+    count: Optional[int] = None
+    edges: Optional[List[ContentAdvisoryEdge]] = None
+
+
+class TopPostsEdgeNode(TypesBaseModel):
+    node: Optional[PostGraph] = None
+
+
+class EdgeHashtagToTopPosts(TypesBaseModel):
+    edges: Optional[Dict[str, TopPostsEdgeNode]] = None
+
+
 class Hashtag(TypesBaseModel):
-    id: str
-    name: str
+    allow_following: Optional[bool] = None
+    edge_hashtag_to_content_advisory: Optional[EdgeHashtagToContentAdvisory] = None
+    edge_hashtag_to_media: Optional[EdgeHashtagToMedia] = None
+    edge_hashtag_to_top_posts: Optional[EdgeHashtagToTopPosts] = None
+    id: Optional[str] = None
+    is_following: Optional[bool] = None
+    is_top_media_only: Optional[bool] = None
     media_count: Optional[int] = None
+    name: Optional[str] = None
     profile_pic_url: Optional[HttpUrl] = None
 
 
