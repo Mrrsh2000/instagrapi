@@ -492,8 +492,11 @@ class EdgeMediaPreviewLike(TypesBaseModel):
     count: Optional[int] = None
 
 
-class CaptionNode(TypesBaseModel):
+class CaptionText(TypesBaseModel):
     text: Optional[str] = None
+
+class CaptionNode(TypesBaseModel):
+    node: Optional[CaptionText] = None
 
 class CaptionEdge(TypesBaseModel):
     node: Optional[CaptionNode] = None
@@ -530,7 +533,7 @@ class PostGraph(TypesBaseModel):
     is_video: Optional[bool] = None
     owner: Optional[Owner] = None
     shortcode: Optional[str] = None
-    taken_at_timestamp: Optional[int] = None  # Can be converted to datetime if needed
+    taken_at_timestamp: Optional[int] = None
     thumbnail_resources: Optional[List[ThumbnailResource]] = None
     thumbnail_src: Optional[HttpUrl] = None
 
