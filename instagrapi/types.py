@@ -7,14 +7,16 @@ from pydantic import (
     FilePath,
     HttpUrl,
     ValidationError,
-    field_validator,
+    field_validator, Field,
 )
 
 
 class TypesBaseModel(BaseModel):
     model_config = ConfigDict(
-        coerce_numbers_to_str=True
-    )  # (jarrodnorwell) fixed city_id issue
+        coerce_numbers_to_str=True,
+        populate_by_name=True,
+        extra="ignore",
+    )
 
 
 def validate_external_url(cls, v):
@@ -493,6 +495,8 @@ class EdgeMediaPreviewLike(TypesBaseModel):
 class CaptionNode(TypesBaseModel):
     text: Optional[str] = None
 
+class CaptionEdge(TypesBaseModel):
+    node: Optional[CaptionNode] = None
 
 class EdgeMediaToCaption(TypesBaseModel):
     edges: Optional[List[CaptionNode]] = None
@@ -513,7 +517,7 @@ class Owner(TypesBaseModel):
 
 
 class PostGraph(TypesBaseModel):
-    __typename: Optional[str] = None
+    typename: Optional[str] = Field(default=None, alias="__typename")
     accessibility_caption: Optional[str] = None
     comments_disabled: Optional[bool] = None
     dimensions: Optional[Dimensions] = None
@@ -556,11 +560,11 @@ class EdgeHashtagToContentAdvisory(TypesBaseModel):
 
 
 class TopPostsEdgeNode(TypesBaseModel):
-    node: Optional[PostGraph] = None
+    node: Optional["PostGraph"] = None
 
 
 class EdgeHashtagToTopPosts(TypesBaseModel):
-    edges: Optional[Dict[str, TopPostsEdgeNode]] = None
+    edges: Optional[List[TopPostsEdgeNode]] = None
 
 
 class Hashtag(TypesBaseModel):
