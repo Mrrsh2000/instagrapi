@@ -142,7 +142,7 @@ class UserShort(TypesBaseModel):
     profile_pic_url_hd: Optional[HttpUrl] = None
     is_private: Optional[bool] = None
     # is_verified: bool  # not found in hashtag_medias_v1
-    # stories: List = [] # not found in fbsearch_suggested_profiles
+    stories: Optional[list[object]] = Field(default_factory=list)
 
 
 class Usertag(TypesBaseModel):
