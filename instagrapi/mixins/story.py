@@ -106,7 +106,7 @@ class StoryMixin:
         return self.media_delete(media_id)
 
     def users_stories_gql(
-        self, user_ids: List[int], amount: int = 0
+            self, user_ids: List[int], amount: int = 0
     ) -> List[UserShort]:
         """
         Get a user's stories (Public API)
@@ -150,6 +150,61 @@ class StoryMixin:
             users.append(user)
         return users
 
+    def users_stories_gql_doc_id(
+            self, user_ids: List[int], amount: int = 0
+    ) -> List[UserShort]:
+        """
+        Get a user's stories (Private API) by new doc id
+
+        Parameters
+        ----------
+        user_ids: List[int]
+            List of users
+        amount: int
+            Max amount of stories
+
+        Returns
+        -------
+        List[UserShort]
+            A list of objects of UserShort for each user_id
+        """
+        assert isinstance(user_ids, list), "user_ids should be a list of user_id"
+        self.inject_sessionid_to_public()
+
+        def _userid_chunks():
+            assert user_ids is not None
+            user_ids_per_query = 50
+            for i in range(0, len(user_ids), user_ids_per_query):
+                end = i + user_ids_per_query
+                yield user_ids[i:end]
+
+        stories_un = {}
+        for userid_chunk in _userid_chunks():
+            data = {
+                "fb_api_caller_class": "RelayModern",
+                "fb_api_req_friendly_name": "PolarisStoriesV3ReelPageStandaloneQuery",
+                "server_timestamps": True,
+                "variables": {
+                    "reel_ids_arr": [userid_chunk]
+                },
+                "doc_id": "25298612026488641"
+            }
+
+            res = self.private_request(
+                "https://www.instagram.com/graphql/query",
+                data=data
+            )
+            stories_un.update(res["data"]["xdt_api__v1__feed__reels_media"])
+        users = []
+        for media in stories_un["reels_media"]:
+            user = extract_user_short(media["user"])
+            items = media["items"]
+            if amount:
+                items = items[:amount]
+            user.stories = [extract_story_gql(m) for m in items]
+            users.append(user)
+        return users
+
     def user_stories_gql(self, user_id: str, amount: int = None) -> List[Story]:
         """
         Get a user's stories (Public API)
@@ -165,11 +220,18 @@ class StoryMixin:
         List[UserShort]
             A list of objects of UserShort for each user_id
         """
-        user = self.users_stories_gql([user_id], amount=amount)[0]
-        stories = deepcopy(user.stories)
-        if amount:
-            stories = stories[:amount]
-        return stories
+        try:
+            user = self.users_stories_gql_doc_id([user_id], amount=amount)[0]
+            stories = deepcopy(user.stories)
+            if amount:
+                stories = stories[:amount]
+            return stories
+        except Exception:
+            user = self.users_stories_gql([user_id], amount=amount)[0]
+            stories = deepcopy(user.stories)
+            if amount:
+                stories = stories[:amount]
+            return stories
 
     def user_stories_v1(self, user_id: str, amount: int = None) -> List[Story]:
         """
@@ -191,10 +253,10 @@ class StoryMixin:
         }
         user_id = int(user_id)
         reel = (
-            self.private_request(f"feed/user/{user_id}/story/", params=params).get(
-                "reel"
-            )
-            or {}
+                self.private_request(f"feed/user/{user_id}/story/", params=params).get(
+                    "reel"
+                )
+                or {}
         )
         stories = []
         for item in reel.get("items", []):
@@ -247,7 +309,7 @@ class StoryMixin:
         )
 
     def story_download(
-        self, story_pk: str, filename: str = "", folder: Path = ""
+            self, story_pk: str, filename: str = "", folder: Path = ""
     ) -> Path:
         """
         Download story media by media_type
@@ -266,7 +328,7 @@ class StoryMixin:
         return self.story_download_by_url(url, filename, folder)
 
     def story_download_by_url(
-        self, url: str, filename: str = "", folder: Path = ""
+            self, url: str, filename: str = "", folder: Path = ""
     ) -> Path:
         """
         Download story media using URL
