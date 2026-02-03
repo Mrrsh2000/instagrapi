@@ -307,6 +307,7 @@ class PrivateRequestMixin:
         headers=None,
         extra_sig=None,
         domain: str = None,
+        is_customized_request=False
     ):
         self.last_response = None
         self.last_json = last_json = {}  # for Sentry context in traceback
@@ -318,13 +319,16 @@ class PrivateRequestMixin:
         # if self.user_id and login:
         #     raise Exception(f"User already logged ({self.user_id})")
         try:
-            if not endpoint.startswith("/"):
-                endpoint = f"/v1/{endpoint}"
+            if is_customized_request:
+                api_url = endpoint
+            else:
+                if not endpoint.startswith("/"):
+                    endpoint = f"/v1/{endpoint}"
 
-            if endpoint == "/challenge/":  # wow so hard, is it safe tho?
-                endpoint = "/v1/challenge/"
+                if endpoint == "/challenge/":  # wow so hard, is it safe tho?
+                    endpoint = "/v1/challenge/"
 
-            api_url = f"https://{domain or config.API_DOMAIN}/api{endpoint}"
+                api_url = f"https://{domain or config.API_DOMAIN}/api{endpoint}"
             self.logger.info(api_url)
             if data:  # POST
                 # Client.direct_answer raw dict
@@ -513,6 +517,7 @@ class PrivateRequestMixin:
         headers=None,
         extra_sig=None,
         domain: str = None,
+        is_customized_request=False
     ):
         if self.authorization:
             if not headers:
@@ -527,6 +532,7 @@ class PrivateRequestMixin:
             headers=headers,
             extra_sig=extra_sig,
             domain=domain,
+            is_customized_request=is_customized_request
         )
         try:
             if self.delay_range:
